@@ -1,26 +1,21 @@
 package com.ziarinetwork.ziari
 
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -34,6 +29,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_main)
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         getCurrentLocationUser()
+
+        BottomSheetBehavior.from(findViewById(R.id.markersInfo)).apply {
+            peekHeight = 80
+            this.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
     }
 
     private fun getCurrentLocationUser() {
@@ -71,21 +72,55 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(gMap: GoogleMap) {
         googleMap = gMap
-        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-        val markerOptions = MarkerOptions()
-            .position(latLng)
-            .title("I am here")
-            .snippet("My Location")
 
-        val marker = googleMap.addMarker(markerOptions)
-        marker?.loadCustomIcon(
-            context = this,
-            imageUrl = "https://media.istockphoto.com/id/1500563478/photo/traveler-asian-woman-relax-and-travel-on-thai-longtail-boat-in-ratchaprapha-dam-at-khao-sok.jpg?s=1024x1024&w=is&k=20&c=z7jZV0uJFgAtDcxm8BUVKnsMh_wluR6QC_cCERNhqaY=",
-            width = 100,
-            height = 100
+        val locations = listOf(
+            LatLng(currentLocation.latitude, currentLocation.longitude),
+            LatLng(40.748817, -73.985428),
+            LatLng(48.858844, 2.294351),
+            LatLng(51.507351, -0.127758)
         )
-        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,6f))
+
+        val imageUrls = listOf(
+            "https://thumbs.dreamstime.com/b/bamboo-hanging-bridge-over-sea-to-tropical-island-pedestrian-remote-desert-beautiful-landscape-travel-lifestyle-wild-nature-82365255.jpg",
+            "https://images.pexels.com/photos/3278215/pexels-photo-3278215.jpeg?cs=srgb&dl=pexels-freestockpro-3278215.jpg&fm=jpg",
+            "https://i.insider.com/5f5a895be6ff30001d4e82b3?width=800&format=jpeg&auto=webp",
+            "https://thumbs.dreamstime.com/b/exotic-tropical-resort-jetty-near-cancun-mexico-travel-vacations-concept-tourism-87825663.jpg"
+        )
+
+        for ((index, latLng) in locations.withIndex()) {
+            val markerOptions = MarkerOptions().position(latLng)
+            val marker = googleMap.addMarker(markerOptions)
+
+            marker?.tag = imageUrls[index]
+
+            marker?.loadCustomIcon(
+                context = this,
+                imageUrl = imageUrls[index],
+                width = 50,
+                height = 50
+            )
+
+            googleMap.setOnCameraIdleListener {
+                val targetPosition = googleMap.cameraPosition.target
+                onMapPositionChanged(targetPosition)
+            }
+        }
+
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locations[0], 6f))
+
+        googleMap.setOnMarkerClickListener { marker ->
+            onMarkerClicked(marker)
+            true
+        }
+    }
+
+    private fun onMapPositionChanged(newPosition: LatLng) {
+        Log.i("POSITION", "Zoom level changed to: $newPosition")
+    }
+
+    private fun onMarkerClicked(marker: Marker) {
+        // Show BottomSheetDialogFragment with the image URL
+        val imageUrl = marker.tag as? String
     }
 
 }
