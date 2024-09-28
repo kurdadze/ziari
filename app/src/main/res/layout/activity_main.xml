@@ -8,6 +8,17 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </FrameLayout>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/mapContainer"
         android:layout_width="0dp"
@@ -27,6 +38,7 @@
             android:id="@+id/markersInfo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="10dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             android:background="@drawable/rounded">
 
@@ -35,6 +47,13 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/baseline_minimize_24"
                 android:layout_gravity="center|top"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/markersRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/list_item"
+                android:layout_marginTop="50dp"/>
         </FrameLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
